@@ -7131,3 +7131,11 @@ u64 gEffSpark4Tex[] = {
 
 
 #include "gLinkAdultSkelGlinkadultskelactionAnim.c"
+
+#include "gLinkAdultSkelGplayeranim_bowl_finishAnim.c"
+
+#include "gLinkAdultSkelGplayeranim_bowl_throwAnim.c"
+
+#include "gLinkAdultSkelGplayeranim_bowl_waitAnim.c"
+
+#include "gLinkAdultSkelGplayeranim_bowl_startAnim.c"

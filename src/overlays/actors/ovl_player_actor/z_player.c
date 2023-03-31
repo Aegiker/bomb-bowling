@@ -339,6 +339,7 @@ s32 func_80852FFC(PlayState* play, Actor* actor, s32 csMode);
 void func_80853080(Player* this, PlayState* play);
 s32 Player_InflictDamage(PlayState* play, s32 damage);
 void func_80853148(PlayState* play, Actor* actor);
+void Player_BombBowling(Player* this, PlayState* play);
 
 // .bss part 1
 static s32 D_80858AA0;
@@ -2515,7 +2516,7 @@ LinkAnimationHeader* func_808346C4(PlayState* play, Player* this) {
     }
 }
 
-s32 func_80834758(PlayState* play, Player* this) {
+s32 func_80834758(PlayState* play, Player* this) { // Z-Target Shielding
     LinkAnimationHeader* anim;
     f32 frame;
 
@@ -2609,7 +2610,7 @@ s32 func_80834A2C(Player* this, PlayState* play) {
     return 1;
 }
 
-s32 func_80834B5C(Player* this, PlayState* play) {
+s32 func_80834B5C(Player* this, PlayState* play) { // Z-Target Shield update
     LinkAnimation_Update(play, &this->skelAnime2);
 
     if (!CHECK_BTN_ALL(sControlInput->cur.button, BTN_R)) {
@@ -3062,6 +3063,11 @@ s32 func_80835C58(PlayState* play, Player* this, PlayerFunc674 func, s32 flags) 
         func_80834644(play, this);
         this->stateFlags1 &= ~PLAYER_STATE1_22;
     }
+
+    if (func != Player_BombBowling) { // don't allow bowling state outside of bowling function
+        this->stateFlags4 &= ~PLAYER_STATE4_BOWL_WAIT;
+    }
+    this->stateFlags4 &= ~PLAYER_STATE4_BOWL_RELEASE; // this should never be active at the start of any actions
 
     func_80832DBC(this);
     this->stateFlags1 &= ~(PLAYER_STATE1_2 | PLAYER_STATE1_6 | PLAYER_STATE1_26 | PLAYER_STATE1_28 | PLAYER_STATE1_29 |
@@ -5622,48 +5628,81 @@ s32 func_8083C1DC(Player* this, PlayState* play) {
     return 0;
 }
 
+void Player_BombBowling(Player* this, PlayState* play) {
+    LinkAnimationHeader* anim;
+
+    Player_ZeroSpeedXZ(this);
+
+    if (LinkAnimation_Update(play, &this->skelAnime)) {
+        if (this->skelAnime.animation == &gLinkAdultSkelGplayeranim_bowl_startAnim) { // end of wind up anim
+            if (this->skelAnime.playSpeed <= 0.0f) { // stop bowling
+                func_8083A060(this, play);
+            } else { // idle bowling
+                anim = &gLinkAdultSkelGplayeranim_bowl_waitAnim;
+                LinkAnimation_Change(play, &this->skelAnime, anim, 1.0f, 0.0f, Animation_GetLastFrame(anim), ANIMMODE_LOOP, 0.0f);
+            }
+        }
+    }
+
+    if (this->skelAnime.animation == &gLinkAdultSkelGplayeranim_bowl_waitAnim) { // currently idling
+        if (!(CHECK_BTN_ALL(sControlInput->cur.button, BTN_R)) && (this->skelAnime.playSpeed > 0.0f)) { // stop bowling
+            anim = &gLinkAdultSkelGplayeranim_bowl_startAnim;
+            LinkAnimation_Change(play, &this->skelAnime, anim, -1.8f, Animation_GetLastFrame(anim), 0.0f, ANIMMODE_ONCE, -4.0f);
+        }
+    }
+}
+
 s32 func_8083C2B0(Player* this, PlayState* play) {
     LinkAnimationHeader* anim;
     f32 frame;
 
-    if ((play->shootingGalleryStatus == 0) && (this->currentShield != PLAYER_SHIELD_NONE) &&
-        CHECK_BTN_ALL(sControlInput->cur.button, BTN_R) &&
-        (Player_IsChildWithHylianShield(this) || (!func_80833B2C(this) && (this->unk_664 == NULL)))) {
-
-        func_80832318(this);
-        func_808323B4(play, this);
-
-        if (func_80835C58(play, this, func_80843188, 0)) {
-            this->stateFlags1 |= PLAYER_STATE1_22;
-
-            if (!Player_IsChildWithHylianShield(this)) {
-                Player_SetModelsForHoldingShield(this);
-                anim = GET_PLAYER_ANIM(PLAYER_ANIMGROUP_defense, this->modelAnimType);
-            } else {
-                anim = &gPlayerAnim_clink_normal_defense_ALL;
-            }
-
-            if (anim != this->skelAnime.animation) {
-                if (func_8008E9C4(this)) {
-                    this->unk_86C = 1.0f;
-                } else {
-                    this->unk_86C = 0.0f;
-                    func_80833C3C(this);
-                }
-                this->unk_6BC = this->unk_6BE = this->unk_6C0 = 0;
-            }
-
-            frame = Animation_GetLastFrame(anim);
-            LinkAnimation_Change(play, &this->skelAnime, anim, 1.0f, frame, frame, ANIMMODE_ONCE, 0.0f);
-
-            if (Player_IsChildWithHylianShield(this)) {
-                func_80832F54(play, this, 4);
-            }
-
-            Player_PlaySfx(this, NA_SE_IT_SHIELD_POSTURE);
+    if ((play->shootingGalleryStatus == 0 && CHECK_BTN_ALL(sControlInput->cur.button, BTN_R)) && ((this->heldActor != NULL) &&
+        (this->heldActor->id == ACTOR_EN_BOM || this->heldActor->id == ACTOR_EN_BOMBF))) { // skyward sword added bomb bowling.
+        if (func_80835C58(play, this, Player_BombBowling, 0)) { // attempt change 674 to bowling update func
+            anim = &gLinkAdultSkelGplayeranim_bowl_startAnim;
+            LinkAnimation_Change(play, &this->skelAnime, anim, 1.8f, 0.0f, Animation_GetLastFrame(anim), ANIMMODE_ONCE, 2.0f);
+            this->stateFlags4 |= PLAYER_STATE4_BOWL_WAIT;
         }
-
         return 1;
+    } else { // inefficiently puts the original function inside of an else because I don't have time to accidentally break it
+        if ((play->shootingGalleryStatus == 0) && (this->currentShield != PLAYER_SHIELD_NONE) &&
+            CHECK_BTN_ALL(sControlInput->cur.button, BTN_R) &&
+            (Player_IsChildWithHylianShield(this) || (!func_80833B2C(this) && (this->unk_664 == NULL)))) {
+            func_80832318(this);
+            func_808323B4(play, this);
+
+            if (func_80835C58(play, this, func_80843188, 0)) {
+                this->stateFlags1 |= PLAYER_STATE1_22;
+
+                if (!Player_IsChildWithHylianShield(this)) {
+                    Player_SetModelsForHoldingShield(this);
+                    anim = GET_PLAYER_ANIM(PLAYER_ANIMGROUP_defense, this->modelAnimType);
+                } else {
+                    anim = &gPlayerAnim_clink_normal_defense_ALL;
+                }
+
+                if (anim != this->skelAnime.animation) {
+                    if (func_8008E9C4(this)) {
+                        this->unk_86C = 1.0f;
+                    } else {
+                        this->unk_86C = 0.0f;
+                        func_80833C3C(this);
+                    }
+                    this->unk_6BC = this->unk_6BE = this->unk_6C0 = 0;
+                }
+
+                frame = Animation_GetLastFrame(anim);
+                LinkAnimation_Change(play, &this->skelAnime, anim, 1.0f, frame, frame, ANIMMODE_ONCE, 0.0f);
+
+                if (Player_IsChildWithHylianShield(this)) {
+                    func_80832F54(play, this, 4);
+                }
+
+                Player_PlaySfx(this, NA_SE_IT_SHIELD_POSTURE);
+            }
+
+            return 1;
+        }
     }
 
     return 0;
@@ -10483,6 +10522,12 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
     s32 pad;
 
     sControlInput = input;
+
+    if (this->stateFlags4 & PLAYER_STATE4_BOWL_WAIT) {
+        gSaveContext.rupees = 777;
+    } else {
+        gSaveContext.rupees = 000;
+    }
 
     if (this->unk_A86 < 0) {
         this->unk_A86++;

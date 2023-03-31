@@ -578,3 +578,11 @@ extern s16 gPlayerAnim_sude_nwait_Data[];
 #endif
 
 #include "gLinkAdultSkelGlinkadultskelactionAnimData.h"
+
+#include "gLinkAdultSkelGplayeranim_bowl_finishAnimData.h"
+
+#include "gLinkAdultSkelGplayeranim_bowl_throwAnimData.h"
+
+#include "gLinkAdultSkelGplayeranim_bowl_waitAnimData.h"
+
+#include "gLinkAdultSkelGplayeranim_bowl_startAnimData.h"

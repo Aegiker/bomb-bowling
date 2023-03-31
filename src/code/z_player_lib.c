@@ -1611,6 +1611,13 @@ void Player_PostLimbDrawGameplay(PlayState* play, s32 limbIndex, Gfx** dList, Ve
 
                 if (this->unk_862 == 0) {
                     Math_Vec3f_Copy(&heldActor->world.pos, &sGetItemRefPos);
+                    if (this->stateFlags4 & PLAYER_STATE4_BOWL_WAIT) { // move bomb down into hands
+                        if (this->skelAnime.animation == &gLinkAdultSkelGplayeranim_bowl_startAnim) { // shift bomb down
+                            heldActor->world.pos.y -= ((6.5f / Animation_GetLastFrame(&gLinkAdultSkelGplayeranim_bowl_startAnim)) * this->skelAnime.curFrame); // ease into bomb offset over animation
+                        } else {
+                            heldActor->world.pos.y -= 6.5f;
+                        }
+                    }
                 }
             }
         }

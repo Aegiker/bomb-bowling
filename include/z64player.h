@@ -576,6 +576,9 @@ typedef struct {
 #define PLAYER_STATE3_RESTORE_NAYRUS_LOVE (1 << 6) // Set by ocarina effects actors when destroyed to signal Nayru's Love may be restored (see `ACTOROVL_ALLOC_ABSOLUTE`)
 #define PLAYER_STATE3_7 (1 << 7)
 
+#define PLAYER_STATE4_BOWL_WAIT (1 << 0)
+#define PLAYER_STATE4_BOWL_RELEASE (1 << 1)
+
 typedef void (*PlayerFunc674)(struct Player*, struct PlayState*);
 typedef s32 (*PlayerFunc82C)(struct Player*, struct PlayState*);
 typedef void (*PlayerFuncA74)(struct PlayState*, struct Player*);
@@ -755,6 +758,7 @@ typedef struct Player {
     /* 0x0A86 */ s8         unk_A86;
     /* 0x0A87 */ u8         unk_A87;
     /* 0x0A88 */ Vec3f      unk_A88; // previous body part 0 position
+    /* 0x---- */ u8         stateFlags4;
 } Player; // size = 0xA94
 
 #endif

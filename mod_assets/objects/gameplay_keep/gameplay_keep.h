@@ -1136,3 +1136,11 @@ extern u64 gEffSpark4Tex[];
 #endif
 
 #include "gLinkAdultSkelGlinkadultskelactionAnim.h"
+
+#include "gLinkAdultSkelGplayeranim_bowl_finishAnim.h"
+
+#include "gLinkAdultSkelGplayeranim_bowl_throwAnim.h"
+
+#include "gLinkAdultSkelGplayeranim_bowl_waitAnim.h"
+
+#include "gLinkAdultSkelGplayeranim_bowl_startAnim.h"
