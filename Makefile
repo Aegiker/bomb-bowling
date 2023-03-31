@@ -9,7 +9,7 @@ SHELL = /bin/bash
 # If COMPARE is 1, check the output md5sum after building
 COMPARE ?= 1
 # If NON_MATCHING is 1, define the NON_MATCHING C flag when building
-NON_MATCHING ?= 0
+NON_MATCHING ?= 1
 # If ORIG_COMPILER is 1, compile with QEMU_IRIX and the original compiler
 ORIG_COMPILER ?= 0
 # If COMPILER is "gcc", compile with GCC instead of IDO.
@@ -266,9 +266,10 @@ setup:
 	python3 fixbaserom.py
 	python3 extract_baserom.py
 	python3 extract_assets.py -j$(N_THREADS)
+	python3 scripts_mod/install_mod_assets.py
 
 test: $(ROM)
-	$(EMULATOR) $(EMU_FLAGS) $<
+	powershell.exe -Command Start-Process zelda_ocarina_mq_dbg.z64
 
 
 .PHONY: all clean setup test distclean assetclean
