@@ -167,7 +167,7 @@ void EnBom_Move(EnBom* this, PlayState* play) {
 
     Actor_MoveXZGravity(&this->actor);
     if (this->bowlFlag) {
-        Actor_UpdateBgCheckInfo(play, &this->actor, 75.0f, 30.0f, 30.0f, UPDBGCHECKINFO_FLAG_2);
+        Actor_UpdateBgCheckInfo(play, &this->actor, 0.0f, 0.0f, 0.0f, UPDBGCHECKINFO_FLAG_2);
     }
 }
 
@@ -286,24 +286,28 @@ void EnBom_Update(Actor* thisx, PlayState* play2) {
 
                 effPos.y += 3.0f;
                 func_8002829C(play, &effPos, &effVelocity, &dustAccel, &dustColor, &dustColor, 50, 5);
-            } else { // bowl bomb handles the particle a bit differently
-                MtxF effPosMtx;
+            } else { // bowl bomb handles the particles differently, calculating where they would be in a quaternion rotation
                 MtxF temp;
-                this->rot += 0x800;
-                this->actor.speed = 0.0f;
-                SkinMatrix_SetTranslateRotateZYX(&effPosMtx, 0, this->actor.world.rot.y, 0, thisx->world.pos.x, thisx->world.pos.y,
+                this->rot += (s16)(0x250 * this->actor.speed);
+                SkinMatrix_SetTranslateRotateZYX(&this->effPosMtx, 0, this->actor.world.rot.y, 0, thisx->world.pos.x, thisx->world.pos.y,
                                       thisx->world.pos.z);
                 SkinMatrix_SetRotateZYX(&temp, this->rot, 0, 0); // add forward rot to matrix
-                SkinMatrix_MtxFMtxFMult(&effPosMtx, &temp, &effPosMtx);
+                SkinMatrix_MtxFMtxFMult(&this->effPosMtx, &temp, &this->effPosMtx);
                 SkinMatrix_SetTranslate(&temp, 0, 0, -17.0f);
-                SkinMatrix_MtxFMtxFMult(&effPosMtx, &temp, &effPosMtx);
-                SkinMatrix_Vec3fMtxFMultXYZ(&effPosMtx, &gZeroVec, &effPos);
-                if ((play->gameplayFrames % 2) == 0) {
-                    //EffectSsGSpk_SpawnFuse(play, thisx, &effPos, &effVelocity, &effAccel);
-                    Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, effPos.x, effPos.y, effPos.z, 0, 0, 0, 0x0);
-                }
+                SkinMatrix_MtxFMtxFMult(&this->effPosMtx, &temp, &this->effPosMtx);
+                SkinMatrix_Vec3fMtxFMultXYZ(&this->effPosMtx, &gZeroVec, &effPos); // store new effect position in effPos
 
+                if ((play->gameplayFrames % 2) == 0) {
+                    EffectSsGSpk_SpawnFuse(play, thisx, &effPos, &effVelocity, &effAccel);
+                }
                 Actor_PlaySfx(thisx, NA_SE_IT_BOMB_IGNIT - SFX_FLAG);
+
+                // this block replaces 'effPos.y += 3.0f`
+                SkinMatrix_SetTranslate(&temp, 0, 0, -3.0f); // add 3 for the next particle
+                SkinMatrix_MtxFMtxFMult(&this->effPosMtx, &temp, &temp); // don't overwrite the effect matrix for this
+                SkinMatrix_Vec3fMtxFMultXYZ(&this->effPosMtx, &gZeroVec, &effPos); // store second effect position in effPos
+
+                func_8002829C(play, &effPos, &effVelocity, &dustAccel, &dustColor, &dustColor, 50, 5);
             }
         }
 
@@ -410,7 +414,9 @@ void EnBom_Draw(Actor* thisx, PlayState* play) {
 
         gSPMatrix(POLY_OPA_DISP++, Matrix_NewMtx(play->state.gfxCtx, "../z_en_bom.c", 928),
                   G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-        gSPDisplayList(POLY_OPA_DISP++, gBombCapDL);
+        if (this->bowlFlag == 0) { // don't have time to deal with this
+            gSPDisplayList(POLY_OPA_DISP++, gBombCapDL);
+        }
         Matrix_RotateZYX(0x4000, 0, 0, MTXMODE_APPLY);
         gSPMatrix(POLY_OPA_DISP++, Matrix_NewMtx(play->state.gfxCtx, "../z_en_bom.c", 934),
                   G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

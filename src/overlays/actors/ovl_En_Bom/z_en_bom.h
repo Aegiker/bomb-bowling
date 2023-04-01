@@ -20,6 +20,7 @@ typedef struct EnBom {
     /* 0x0204 */ EnBomActionFunc actionFunc;
     /* 0x---- */ u8 bowlFlag;
     /* 0x---- */ s16 rot;
+    /* 0x---- */ MtxF effPosMtx;
 } EnBom; // size = 0x0208
 
 typedef enum {

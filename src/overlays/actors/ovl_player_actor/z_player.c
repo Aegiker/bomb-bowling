@@ -5630,7 +5630,9 @@ s32 func_8083C1DC(Player* this, PlayState* play) {
 }
 
 void Player_BombBowling(Player* this, PlayState* play) {
+    static f32 throwSpeed = 0.8f;
     LinkAnimationHeader* anim;
+    f32 frame;
 
     Player_ZeroSpeedXZ(this);
 
@@ -5644,7 +5646,7 @@ void Player_BombBowling(Player* this, PlayState* play) {
             }
         } else if (this->skelAnime.animation == &gLinkAdultSkelGplayeranim_bowl_throwAnim) { // end bomb throw anim
             anim = &gLinkAdultSkelGplayeranim_bowl_finishAnim;
-            LinkAnimation_Change(play, &this->skelAnime, anim, 1.0f, 0.0f, Animation_GetLastFrame(anim) - 5.0f, ANIMMODE_ONCE, 0.0f);
+            LinkAnimation_Change(play, &this->skelAnime, anim, 1.0f, 0.0f, Animation_GetLastFrame(anim), ANIMMODE_ONCE, 0.0f);
         } else if (this->skelAnime.animation == &gLinkAdultSkelGplayeranim_bowl_finishAnim) { // end bowling
             func_8083A060(this, play);
         }
@@ -5656,17 +5658,22 @@ void Player_BombBowling(Player* this, PlayState* play) {
             LinkAnimation_Change(play, &this->skelAnime, anim, -1.8f, Animation_GetLastFrame(anim), 0.0f, ANIMMODE_ONCE, -4.0f);
         } else if ((CHECK_BTN_ALL(sControlInput->cur.button, BTN_A)) && this->heldActor != NULL) { // throw!
             anim = &gLinkAdultSkelGplayeranim_bowl_throwAnim;
-            LinkAnimation_Change(play, &this->skelAnime, anim, 1.0f, 0.0f, Animation_GetLastFrame(anim), ANIMMODE_ONCE, 2.0f);
+            LinkAnimation_Change(play, &this->skelAnime, anim, throwSpeed, 0.0f, Animation_GetLastFrame(anim), ANIMMODE_ONCE, 2.0f);
         }
     } else if (this->skelAnime.animation == &gLinkAdultSkelGplayeranim_bowl_throwAnim) {
-        if (this->skelAnime.curFrame == 9.0f) { // throw the bomb
+        if ((u32)(this->skelAnime.curFrame) == 9.0f) { // throw the bomb
             this->stateFlags4 |= PLAYER_STATE4_BOWL_RELEASE;
             return;
         }
     }
 
-    if (this->stateFlags4 &= PLAYER_STATE4_BOWL_RELEASE) { // wait one cycle before checking this to ensure the bomb updates
-        func_8084409C(play, this, 8.0f, 0.0f);
+    if (this->stateFlags4 & PLAYER_STATE4_BOWL_RELEASE) { // wait one cycle before checking this to ensure the bomb updates
+        frame = this->skelAnime.curFrame;
+        func_8084409C(play, this, 10.0f, 0.0f);
+        // restore Link state
+        func_80835C58(play, this, Player_BombBowling, 0);
+        anim = &gLinkAdultSkelGplayeranim_bowl_throwAnim;
+        LinkAnimation_Change(play, &this->skelAnime, anim, throwSpeed, frame, Animation_GetLastFrame(anim), ANIMMODE_ONCE, 0.0f);
     }
 }
 
@@ -5676,9 +5683,9 @@ s32 func_8083C2B0(Player* this, PlayState* play) {
 
     if ((play->shootingGalleryStatus == 0 && CHECK_BTN_ALL(sControlInput->cur.button, BTN_R)) && ((this->heldActor != NULL) &&
         (this->heldActor->id == ACTOR_EN_BOM))) { // skyward sword added bomb bowling.
-        if (func_80835C58(play, this, Player_BombBowling, 0)) { // attempt change 674 to bowling update func
+        if (func_80835C58(play, this, Player_BombBowling, 0) && !(this->stateFlags4 & PLAYER_STATE4_BOWL_WAIT)) { // attempt change 674 to bowling update func
             anim = &gLinkAdultSkelGplayeranim_bowl_startAnim;
-            LinkAnimation_Change(play, &this->skelAnime, anim, 1.8f, 0.0f, Animation_GetLastFrame(anim), ANIMMODE_ONCE, 2.0f);
+            LinkAnimation_Change(play, &this->skelAnime, anim, 1.6f, 0.0f, Animation_GetLastFrame(anim), ANIMMODE_ONCE, 2.0f);
             this->stateFlags4 |= PLAYER_STATE4_BOWL_WAIT;
         }
         return 1;
