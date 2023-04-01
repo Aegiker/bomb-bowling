@@ -5630,7 +5630,7 @@ s32 func_8083C1DC(Player* this, PlayState* play) {
 }
 
 void Player_BombBowling(Player* this, PlayState* play) {
-    static f32 throwSpeed = 0.8f;
+    static f32 throwSpeed = 0.9f;
     LinkAnimationHeader* anim;
     f32 frame;
 
@@ -5646,7 +5646,7 @@ void Player_BombBowling(Player* this, PlayState* play) {
             }
         } else if (this->skelAnime.animation == &gLinkAdultSkelGplayeranim_bowl_throwAnim) { // end bomb throw anim
             anim = &gLinkAdultSkelGplayeranim_bowl_finishAnim;
-            LinkAnimation_Change(play, &this->skelAnime, anim, 1.0f, 0.0f, Animation_GetLastFrame(anim), ANIMMODE_ONCE, 0.0f);
+            LinkAnimation_Change(play, &this->skelAnime, anim, 1.5f, 0.0f, Animation_GetLastFrame(anim), ANIMMODE_ONCE, -2.0f);
         } else if (this->skelAnime.animation == &gLinkAdultSkelGplayeranim_bowl_finishAnim) { // end bowling
             func_8083A060(this, play);
         }
