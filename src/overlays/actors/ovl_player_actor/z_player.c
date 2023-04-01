@@ -340,6 +340,7 @@ void func_80853080(Player* this, PlayState* play);
 s32 Player_InflictDamage(PlayState* play, s32 damage);
 void func_80853148(PlayState* play, Actor* actor);
 void Player_BombBowling(Player* this, PlayState* play);
+void func_8084409C(PlayState* play, Player* this, f32 speedXZ, f32 velocityY);
 
 // .bss part 1
 static s32 D_80858AA0;
@@ -5641,6 +5642,11 @@ void Player_BombBowling(Player* this, PlayState* play) {
                 anim = &gLinkAdultSkelGplayeranim_bowl_waitAnim;
                 LinkAnimation_Change(play, &this->skelAnime, anim, 1.0f, 0.0f, Animation_GetLastFrame(anim), ANIMMODE_LOOP, 0.0f);
             }
+        } else if (this->skelAnime.animation == &gLinkAdultSkelGplayeranim_bowl_throwAnim) { // end bomb throw anim
+            anim = &gLinkAdultSkelGplayeranim_bowl_finishAnim;
+            LinkAnimation_Change(play, &this->skelAnime, anim, 1.0f, 0.0f, Animation_GetLastFrame(anim) - 5.0f, ANIMMODE_ONCE, 0.0f);
+        } else if (this->skelAnime.animation == &gLinkAdultSkelGplayeranim_bowl_finishAnim) { // end bowling
+            func_8083A060(this, play);
         }
     }
 
@@ -5648,7 +5654,19 @@ void Player_BombBowling(Player* this, PlayState* play) {
         if (!(CHECK_BTN_ALL(sControlInput->cur.button, BTN_R)) && (this->skelAnime.playSpeed > 0.0f)) { // stop bowling
             anim = &gLinkAdultSkelGplayeranim_bowl_startAnim;
             LinkAnimation_Change(play, &this->skelAnime, anim, -1.8f, Animation_GetLastFrame(anim), 0.0f, ANIMMODE_ONCE, -4.0f);
+        } else if ((CHECK_BTN_ALL(sControlInput->cur.button, BTN_A)) && this->heldActor != NULL) { // throw!
+            anim = &gLinkAdultSkelGplayeranim_bowl_throwAnim;
+            LinkAnimation_Change(play, &this->skelAnime, anim, 1.0f, 0.0f, Animation_GetLastFrame(anim), ANIMMODE_ONCE, 2.0f);
         }
+    } else if (this->skelAnime.animation == &gLinkAdultSkelGplayeranim_bowl_throwAnim) {
+        if (this->skelAnime.curFrame == 9.0f) { // throw the bomb
+            this->stateFlags4 |= PLAYER_STATE4_BOWL_RELEASE;
+            return;
+        }
+    }
+
+    if (this->stateFlags4 &= PLAYER_STATE4_BOWL_RELEASE) { // wait one cycle before checking this to ensure the bomb updates
+        func_8084409C(play, this, 8.0f, 0.0f);
     }
 }
 
@@ -5657,7 +5675,7 @@ s32 func_8083C2B0(Player* this, PlayState* play) {
     f32 frame;
 
     if ((play->shootingGalleryStatus == 0 && CHECK_BTN_ALL(sControlInput->cur.button, BTN_R)) && ((this->heldActor != NULL) &&
-        (this->heldActor->id == ACTOR_EN_BOM || this->heldActor->id == ACTOR_EN_BOMBF))) { // skyward sword added bomb bowling.
+        (this->heldActor->id == ACTOR_EN_BOM))) { // skyward sword added bomb bowling.
         if (func_80835C58(play, this, Player_BombBowling, 0)) { // attempt change 674 to bowling update func
             anim = &gLinkAdultSkelGplayeranim_bowl_startAnim;
             LinkAnimation_Change(play, &this->skelAnime, anim, 1.8f, 0.0f, Animation_GetLastFrame(anim), ANIMMODE_ONCE, 2.0f);
@@ -9904,10 +9922,18 @@ void func_808473D4(PlayState* play, Player* this) {
                 } else if ((this->stateFlags1 & PLAYER_STATE1_11) && (this->getItemId == GI_NONE) &&
                            (heldActor != NULL)) {
                     if ((this->actor.bgCheckFlags & BGCHECKFLAG_GROUND) || (heldActor->id == ACTOR_EN_NIW)) {
-                        if (func_8083EAF0(this, heldActor) == 0) {
-                            doAction = DO_ACTION_DROP;
+                        if (this->func_674 == Player_BombBowling) { // special A button text setup for bomb bowling
+                            if (this->skelAnime.animation != &gLinkAdultSkelGplayeranim_bowl_waitAnim) {
+                                doAction = DO_ACTION_NONE;
+                            } else {
+                                doAction = DO_ACTION_THROW;
+                            }
                         } else {
-                            doAction = DO_ACTION_THROW;
+                            if (func_8083EAF0(this, heldActor) == 0) {
+                                doAction = DO_ACTION_DROP;
+                            } else {
+                                doAction = DO_ACTION_THROW;
+                            }
                         }
                     }
                 } else if (!(this->stateFlags1 & PLAYER_STATE1_27) && func_8083A0D4(this) &&

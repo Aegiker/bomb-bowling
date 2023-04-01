@@ -143,8 +143,19 @@ void EnBom_Move(EnBom* this, PlayState* play) {
 
     if (!(this->actor.bgCheckFlags & BGCHECKFLAG_GROUND)) {
         Math_StepToF(&this->actor.speed, 0.0f, 0.08f);
+        if (this->bowlFlag > 1) { // unset the floor sfx flag for bowl bombs
+            this->bowlFlag = 1;
+        }
     } else {
-        Math_StepToF(&this->actor.speed, 0.0f, 1.0f);
+        if (!this->bowlFlag) {
+            Math_StepToF(&this->actor.speed, 0.0f, 1.0f);
+        } else {
+            Math_StepToF(&this->actor.speed, 0.0f, 0.2f);
+            if (this->bowlFlag == 1) {
+                Actor_PlaySfx(&this->actor, NA_SE_EV_BOMB_BOUND);
+                this->bowlFlag = 2; // set the flag not to replay the ground collision sfx until it gets off the ground
+            }
+        }
         if ((this->actor.bgCheckFlags & BGCHECKFLAG_GROUND_TOUCH) && (this->actor.velocity.y < -3.0f)) {
             func_8002F850(play, &this->actor);
             this->actor.velocity.y *= -0.3f;
@@ -155,6 +166,9 @@ void EnBom_Move(EnBom* this, PlayState* play) {
     }
 
     Actor_MoveXZGravity(&this->actor);
+    if (this->bowlFlag) {
+        Actor_UpdateBgCheckInfo(play, &this->actor, 75.0f, 30.0f, 30.0f, UPDBGCHECKINFO_FLAG_2);
+    }
 }
 
 void EnBom_WaitForRelease(EnBom* this, PlayState* play) {
@@ -218,6 +232,8 @@ void EnBom_Explode(EnBom* this, PlayState* play) {
 }
 
 void EnBom_Update(Actor* thisx, PlayState* play2) {
+    Player* player = GET_PLAYER(play2);
+    static Vec3f gZeroVec = { 0.0f, 0.0f, 0.0f };
     Vec3f effVelocity = { 0.0f, 0.0f, 0.0f };
     Vec3f bomb2Accel = { 0.0f, 0.1f, 0.0f };
     Vec3f effAccel = { 0.0f, 0.0f, 0.0f };
@@ -229,6 +245,11 @@ void EnBom_Update(Actor* thisx, PlayState* play2) {
     EnBom* this = (EnBom*)thisx;
 
     thisx->gravity = -1.2f;
+
+    // set the bowl flag
+    if (player->heldActor == thisx && player->stateFlags4 & PLAYER_STATE4_BOWL_RELEASE) {
+        this->bowlFlag = 1;
+    }
 
     if (this->timer != 0) {
         this->timer--;
@@ -253,17 +274,37 @@ void EnBom_Update(Actor* thisx, PlayState* play2) {
         if (this->timer < 63) {
             dustAccel.y = 0.2f;
 
-            // spawn spark effect on even frames
-            effPos = thisx->world.pos;
-            effPos.y += 17.0f;
-            if ((play->gameplayFrames % 2) == 0) {
-                EffectSsGSpk_SpawnFuse(play, thisx, &effPos, &effVelocity, &effAccel);
+            if (!this->bowlFlag) {
+                // spawn spark effect on even frames
+                effPos = thisx->world.pos;
+                effPos.y += 17.0f;
+                if ((play->gameplayFrames % 2) == 0) {
+                    EffectSsGSpk_SpawnFuse(play, thisx, &effPos, &effVelocity, &effAccel);
+                }
+
+                Actor_PlaySfx(thisx, NA_SE_IT_BOMB_IGNIT - SFX_FLAG);
+
+                effPos.y += 3.0f;
+                func_8002829C(play, &effPos, &effVelocity, &dustAccel, &dustColor, &dustColor, 50, 5);
+            } else { // bowl bomb handles the particle a bit differently
+                MtxF effPosMtx;
+                MtxF temp;
+                this->rot += 0x800;
+                this->actor.speed = 0.0f;
+                SkinMatrix_SetTranslateRotateZYX(&effPosMtx, 0, this->actor.world.rot.y, 0, thisx->world.pos.x, thisx->world.pos.y,
+                                      thisx->world.pos.z);
+                SkinMatrix_SetRotateZYX(&temp, this->rot, 0, 0); // add forward rot to matrix
+                SkinMatrix_MtxFMtxFMult(&effPosMtx, &temp, &effPosMtx);
+                SkinMatrix_SetTranslate(&temp, 0, 0, -17.0f);
+                SkinMatrix_MtxFMtxFMult(&effPosMtx, &temp, &effPosMtx);
+                SkinMatrix_Vec3fMtxFMultXYZ(&effPosMtx, &gZeroVec, &effPos);
+                if ((play->gameplayFrames % 2) == 0) {
+                    //EffectSsGSpk_SpawnFuse(play, thisx, &effPos, &effVelocity, &effAccel);
+                    Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, effPos.x, effPos.y, effPos.z, 0, 0, 0, 0x0);
+                }
+
+                Actor_PlaySfx(thisx, NA_SE_IT_BOMB_IGNIT - SFX_FLAG);
             }
-
-            Actor_PlaySfx(thisx, NA_SE_IT_BOMB_IGNIT - SFX_FLAG);
-
-            effPos.y += 3.0f;
-            func_8002829C(play, &effPos, &effVelocity, &dustAccel, &dustColor, &dustColor, 50, 5);
         }
 
         if ((this->bombCollider.base.acFlags & AC_HIT) || ((this->bombCollider.base.ocFlags1 & OC1_HIT) &&
