@@ -2471,6 +2471,22 @@ LinkAnimationHeader gPlayerAnim_Link_ue_wait = {
     { 40 }, gPlayerAnim_Link_ue_wait_Data
 };
 
+LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_startAnim = {
+	{ 19 }, gLinkAdultSkelGplayeranim_bowl_startAnimData 
+};
+
+LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_waitAnim = {
+	{ 31 }, gLinkAdultSkelGplayeranim_bowl_waitAnimData 
+};
+
+LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_throwAnim = {
+	{ 18 }, gLinkAdultSkelGplayeranim_bowl_throwAnimData 
+};
+
+LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_finishAnim = {
+	{ 10 }, gLinkAdultSkelGplayeranim_bowl_finishAnimData 
+};
+
 u8 gameplay_keep_possiblePadding_0034F8[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 };
@@ -7127,20 +7143,4 @@ u64 gEffSpark3Tex[] = {
 
 u64 gEffSpark4Tex[] = {
 #include "assets/objects/gameplay_keep/eff_spark_4.i4.inc.c"
-};
-
-LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_startAnim = {
-	{ 19 }, gLinkAdultSkelGplayeranim_bowl_startAnimData 
-};
-
-LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_waitAnim = {
-	{ 31 }, gLinkAdultSkelGplayeranim_bowl_waitAnimData 
-};
-
-LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_throwAnim = {
-	{ 18 }, gLinkAdultSkelGplayeranim_bowl_throwAnimData 
-};
-
-LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_finishAnim = {
-	{ 10 }, gLinkAdultSkelGplayeranim_bowl_finishAnimData 
 };

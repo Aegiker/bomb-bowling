@@ -589,6 +589,10 @@ extern LinkAnimationHeader gPlayerAnim_Link_miageru;
 extern LinkAnimationHeader gPlayerAnim_Link_muku;
 extern LinkAnimationHeader gPlayerAnim_Link_otituku_w;
 extern LinkAnimationHeader gPlayerAnim_Link_ue_wait;
+extern LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_startAnim;
+extern LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_waitAnim;
+extern LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_throwAnim;
+extern LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_finishAnim;
 extern Vtx gameplay_keepVtx_003500[];
 extern Gfx gDebugPyramidDL[];
 extern u64 gDebugCircleTex[];
@@ -1132,9 +1136,5 @@ extern u64 gEffSpark1Tex[];
 extern u64 gEffSpark2Tex[];
 extern u64 gEffSpark3Tex[];
 extern u64 gEffSpark4Tex[];
-extern LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_startAnim;
-extern LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_waitAnim;
-extern LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_throwAnim;
-extern LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_finishAnim;
 
 #endif
