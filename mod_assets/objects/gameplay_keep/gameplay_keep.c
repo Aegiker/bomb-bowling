@@ -7129,13 +7129,18 @@ u64 gEffSpark4Tex[] = {
 #include "assets/objects/gameplay_keep/eff_spark_4.i4.inc.c"
 };
 
+LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_startAnim = {
+	{ 19 }, gLinkAdultSkelGplayeranim_bowl_startAnimData 
+};
 
-#include "gLinkAdultSkelGlinkadultskelactionAnim.c"
+LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_waitAnim = {
+	{ 31 }, gLinkAdultSkelGplayeranim_bowl_waitAnimData 
+};
 
-#include "gLinkAdultSkelGplayeranim_bowl_finishAnim.c"
+LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_throwAnim = {
+	{ 18 }, gLinkAdultSkelGplayeranim_bowl_throwAnimData 
+};
 
-#include "gLinkAdultSkelGplayeranim_bowl_throwAnim.c"
-
-#include "gLinkAdultSkelGplayeranim_bowl_waitAnim.c"
-
-#include "gLinkAdultSkelGplayeranim_bowl_startAnim.c"
+LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_finishAnim = {
+	{ 10 }, gLinkAdultSkelGplayeranim_bowl_finishAnimData 
+};

@@ -1132,15 +1132,9 @@ extern u64 gEffSpark1Tex[];
 extern u64 gEffSpark2Tex[];
 extern u64 gEffSpark3Tex[];
 extern u64 gEffSpark4Tex[];
+extern LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_startAnim;
+extern LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_waitAnim;
+extern LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_throwAnim;
+extern LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_finishAnim;
 
 #endif
-
-#include "gLinkAdultSkelGlinkadultskelactionAnim.h"
-
-#include "gLinkAdultSkelGplayeranim_bowl_finishAnim.h"
-
-#include "gLinkAdultSkelGplayeranim_bowl_throwAnim.h"
-
-#include "gLinkAdultSkelGplayeranim_bowl_waitAnim.h"
-
-#include "gLinkAdultSkelGplayeranim_bowl_startAnim.h"

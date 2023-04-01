@@ -574,15 +574,9 @@ extern s16 gPlayerAnim_o_get_mae_Data[];
 extern s16 gPlayerAnim_om_get_Data[];
 extern s16 gPlayerAnim_om_get_mae_Data[];
 extern s16 gPlayerAnim_sude_nwait_Data[];
+extern s16 gLinkAdultSkelGplayeranim_bowl_startAnimData[];
+extern s16 gLinkAdultSkelGplayeranim_bowl_waitAnimData[];
+extern s16 gLinkAdultSkelGplayeranim_bowl_throwAnimData[];
+extern s16 gLinkAdultSkelGplayeranim_bowl_finishAnimData[];
 
 #endif
-
-#include "gLinkAdultSkelGlinkadultskelactionAnimData.h"
-
-#include "gLinkAdultSkelGplayeranim_bowl_finishAnimData.h"
-
-#include "gLinkAdultSkelGplayeranim_bowl_throwAnimData.h"
-
-#include "gLinkAdultSkelGplayeranim_bowl_waitAnimData.h"
-
-#include "gLinkAdultSkelGplayeranim_bowl_startAnimData.h"

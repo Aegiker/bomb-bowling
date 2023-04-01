@@ -1,1 +1,0 @@
-extern LinkAnimationHeader gLinkAdultSkelGplayeranim_bowl_throwAnim;

@@ -1,1 +1,0 @@
-extern LinkAnimationHeader gLinkAdultSkelGlinkadultskelactionAnim;
